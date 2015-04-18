@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * An {@code ArrayList} containing only strings. The only difference between this and {@code ArrayList<String>} is that
  * {@code contains} does not consider the case of letters when comparing strings
  */
-public class CaselessStringArrayList extends ArrayList<String> {
+public final class CaselessStringArrayList extends ArrayList<String> {
 
     @Override
     public boolean contains(Object o) {

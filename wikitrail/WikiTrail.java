@@ -1,9 +1,15 @@
 package wikitrail;
 
+import org.apache.commons.io.IOUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
 /**
  * Follows the wiki trail of a certain page to Philosophy. Inspired by the alt-text of http://xkcd.com/903.
  */
-public class WikiTrail {
+public final class WikiTrail {
 
     private final CaselessStringArrayList trail = new CaselessStringArrayList();
 
@@ -38,7 +44,12 @@ public class WikiTrail {
                     break;
                 }
 
-                article = getNextArticle(article);
+                try {
+                    article = getNextArticle(article);
+                } catch (IOException e) {
+                    System.err.println("Error getting article \"" + article + "\"");
+                    break;
+                }
             }
             printTrail();
         }
@@ -69,7 +80,10 @@ public class WikiTrail {
      * @param article the first article
      * @return the next article
      */
-    private String getNextArticle(String article) {
+    private String getNextArticle(String article) throws IOException {
+        InputStream in = new URL("http://wikipedia.org/wiki/" + article).openStream();
+        System.out.println(IOUtils.toString(in));
+        IOUtils.closeQuietly(in);
         return "Philosophy";
     }
 
