@@ -5,6 +5,8 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Follows the wiki trail of a certain page to Philosophy. A wiki trail is the series of pages you get
@@ -19,6 +21,7 @@ public final class WikiTrail {
    * reaches the article by this name.
    */
   private static final String DESTINATION = "philosophy";
+  private static final int FLAGS = Pattern.DOTALL;
 
   private final CaselessStringLinkedList trail = new CaselessStringLinkedList();
 
@@ -57,11 +60,8 @@ public final class WikiTrail {
           break;
         }
 
-        try {
-          article = getNextArticle(article); // Get the next article from Wikipedia
-        } catch (IOException e) {
-          // Error getting the article
-          System.err.println("Error getting article \"" + article + "\"");
+        // Get the next article from Wikipedia. If an error occurred, break out.
+        if ((article = getNextArticle(article)) == null) {
           break;
         }
       }
@@ -93,13 +93,24 @@ public final class WikiTrail {
    * first article linked in the given article's body that is not in parentheses or italics.
    *
    * @param article the first article
-   * @return the next article
-   * @throws IOException if an error occurs while retrieving the article
+   * @return the next article, or {@code null} if an exception occurs
    */
-  private String getNextArticle(String article) throws IOException {
-    InputStream in = new URL("http://wikipedia.org/wiki/" + article).openStream();
-    final String articleBody = IOUtils.toString(in); // Get the string from the webpage
-    IOUtils.closeQuietly(in);
+  private String getNextArticle(String article) {
+    InputStream in = null;
+    String articleBody;
+    try {
+      in = new URL("https://en.wikipedia.org/wiki/" + article).openStream();
+      articleBody = IOUtils.toString(in); // Get the string from the webpage
+    } catch (IOException e) {
+      // Error loading the article. Print a message and return null.
+      System.err.printf("Error getting article \"%s\"\n", article);
+      return null;
+    } finally {
+      // Close the stream, if it was opened
+      if (in != null) {
+        IOUtils.closeQuietly(in);
+      }
+    }
     return getNextArticleFromBody(articleBody);
   }
 
@@ -111,7 +122,26 @@ public final class WikiTrail {
    * @return the name of the first article validly linked in {@code articleBody}
    */
   private String getNextArticleFromBody(String articleBody) {
-    // TODO: Filter out article name
+    final Pattern divContent = Pattern.compile("mw-body-content.*</div>", FLAGS);
+    final Pattern pTag = Pattern.compile("<p>.*</p>", FLAGS);
+    final Pattern aTag = Pattern.compile("<a href=\"/wiki/\\b[^>]*>(.*?)</a>", FLAGS);
+
+    // Cut down to everything in the article body
+    Matcher m = divContent.matcher(articleBody);
+    if(m.find()) {
+      // Cut down to everything in the outermost <p> tag
+      m = pTag.matcher(m.group());
+      if(m.find()) {
+        // Get everything in an <a> tag
+        m = aTag.matcher(m.group());
+        while(m.find()) {
+          System.out.println("--------------------------");
+          System.out.println(m.group());
+        }
+      }
+    } else {
+      System.out.println("No match found");
+    }
     return "Philosophy";
   }
 
