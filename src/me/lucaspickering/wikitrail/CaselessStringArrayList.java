@@ -1,4 +1,4 @@
-package wikitrail;
+package me.lucaspickering.wikitrail;
 
 import java.util.ArrayList;
 
