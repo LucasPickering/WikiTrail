@@ -123,18 +123,20 @@ public final class WikiTrail {
    */
   private String getNextArticleFromBody(String articleBody) {
     final Pattern divContent = Pattern.compile("mw-body-content.*</div>", FLAGS);
-    final Pattern pTag = Pattern.compile("<p>.*</p>", FLAGS);
+    final Pattern pTag = Pattern.compile("<p\\b[^>]*>(.*?)</p>", FLAGS);
+    final Pattern stripParens = Pattern.compile("", FLAGS);
+    final Pattern stripItalics = Pattern.compile("", FLAGS);
     final Pattern aTag = Pattern.compile("<a href=\"/wiki/\\b[^>]*>(.*?)</a>", FLAGS);
 
     // Cut down to everything in the article body
     Matcher m = divContent.matcher(articleBody);
-    if(m.find()) {
+    if (m.find()) {
       // Cut down to everything in the outermost <p> tag
       m = pTag.matcher(m.group());
-      if(m.find()) {
+      while (m.find()) {
         // Get everything in an <a> tag
-        m = aTag.matcher(m.group());
-        while(m.find()) {
+        final Matcher m1 = aTag.matcher(m.group());
+        while (m1.find()) {
           System.out.println("--------------------------");
           System.out.println(m.group());
         }
