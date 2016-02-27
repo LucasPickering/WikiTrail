@@ -15,7 +15,6 @@ destArticle = "philosophy"
 wikiUrl = "http://en.wikipedia.org/wiki/"
 bodyRegex = r'mw-body-content.*</div>'
 pRegex = r'<p[^>]*>(.*?)</p>'
-parenRegex = r'(?<!href=")\w*\([^)]*\)'
 italicsRegex = r'<i>[^<]*</i>'
 linkRegex = r'<a href="/wiki/(?!Help:)(.*?)"'
 
@@ -29,21 +28,25 @@ def getArticleHtml(name):
 # Returns the name of the first article linked in the given html text, in all lower case
 def getNextArticleName(page):
     page = ''.join(re.findall(pRegex, page, re.DOTALL)) # Get everything in <p> tags
-    #page = re.sub(parenRegex, '', page) # Strip out everything in parentheses
-    page = stripParens(page) # Strip out everything in parentheses
     page = re.sub(italicsRegex, '', page) # Strip out everything in italics
+    page = stripParens(page) # Strip out everything in parentheses
     page = re.findall(linkRegex, page, re.DOTALL)[0] # Get the first wiki link
     return page
 
 def stripParens(s):
-    while '(' in s and ')' in s:
-        openParen = s.index('(') # Index of the first open paren
-        if s[:openParen].count('"') % 2 == 1:
-            break
-        rest = s[openParen:] # Everything after the first open paren
-        closeParen = rest.index(')') # Index of the first close paren in rest
-        s = s[:openParen] + rest[closeParen + 1:] # Concat everything outside the parens
-    return s
+    inQuotes = False
+    inParens = False
+    result = ""
+    for c in s:
+        if c == '"':
+            inQuotes = not inQuotes
+        elif c == '(':
+            inParens = True
+        elif c == ')':
+            inParens = False
+        if inQuotes or not inParens:
+            result += c
+    return result
 
 # If no article name was passed in
 if(len(sys.argv) < 2):
