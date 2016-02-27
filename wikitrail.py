@@ -7,6 +7,7 @@
 
 from urllib.request import urlopen
 from urllib.error import HTTPError
+from operator import xor
 import sys
 import re
 
@@ -40,15 +41,8 @@ def stripParens(s):
     result = ""
 
     for c in s: # For each character in the string...
-        # Track whether or not we're in quotes
-        if c == '"':
-            inQuotes = not inQuotes
-        # Track whether or not we're in parens
-        elif c == '(':
-            inParens = True
-        elif c == ')':
-            inParens = False
-
+        inQuotes = xor(inQuotes, c == '"') # Track whether or not we're in quotes
+        inParens = (inParens or c == '(') and c != ')' # Track whether or not we're in parens
         if inQuotes or not inParens: # If we're in quotes or not in parens...
             result += c # Add this character to the result
 
