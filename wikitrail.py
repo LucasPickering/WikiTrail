@@ -11,10 +11,10 @@ import sys
 import re
 
 # Constants
-destArticle = "philosophy"
+destArticle = "Philosophy"
 wikiUrl = "http://en.wikipedia.org/wiki/"
-bodyRegex = r'mw-body-content.*</div>'
 pRegex = r'<p[^>]*>(.*?)</p>'
+spanRegex = r'<span[^>]*>(.*?)</span>'
 italicsRegex = r'<i>[^<]*</i>'
 linkRegex = r'<a href="/wiki/(?!Help:)(.*?)"'
 
@@ -28,6 +28,7 @@ def getArticleHtml(name):
 # Returns the name of the first article linked in the given html text, in all lower case
 def getNextArticleName(page):
     page = ''.join(re.findall(pRegex, page, re.DOTALL)) # Get everything in <p> tags
+    page = re.sub(spanRegex, '', page) # Strip out everything in a span tag
     page = re.sub(italicsRegex, '', page) # Strip out everything in italics
     page = stripParens(page) # Strip out everything in parentheses
     page = re.findall(linkRegex, page, re.DOTALL)[0] # Get the first wiki link
@@ -70,6 +71,7 @@ while(article.lower() != destArticle.lower()): # While we haven't reached the de
     trail.append(article) # Add this article to the trail
 
 # Print the trail
+print("It took {} step(s) to find {}".format(len(trail), destArticle))
 i = 1
 for step in trail:
     print("{}. {}".format(i, step))
