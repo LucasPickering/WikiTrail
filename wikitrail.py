@@ -37,15 +37,20 @@ def stripParens(s):
     inQuotes = False
     inParens = False
     result = ""
-    for c in s:
+
+    for c in s: # For each character in the string...
+        # Track whether or not we're in quotes
         if c == '"':
             inQuotes = not inQuotes
+        # Track whether or not we're in parens
         elif c == '(':
             inParens = True
         elif c == ')':
             inParens = False
-        if inQuotes or not inParens:
-            result += c
+
+        if inQuotes or not inParens: # If we're in quotes or not in parens...
+            result += c # Add this character to the result
+
     return result
 
 # If no article name was passed in
@@ -56,7 +61,6 @@ if(len(sys.argv) < 2):
 article = sys.argv[1] # Get the article name
 trail = [article] # Initialize a list to track the trail
 while(article.lower() != destArticle.lower()): # While we haven't reached the destination...
-    print("Working on " + article) # TODO: Remove this line
     article = getNextArticleName(getArticleHtml(article)) # Get the next article
     if article in trail: # IF the next article is already in the trail...
         # Print error and break
