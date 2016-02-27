@@ -37,10 +37,12 @@ def getNextArticleName(page):
 
 def stripParens(s):
     while '(' in s and ')' in s:
-        openParen = s.index('(')
-        closeParen = s[openParen:].index(')') + openParen
-        rest = s[openParen:]
-        s = s[:openParen] + rest[closeParen:]
+        openParen = s.index('(') # Index of the first open paren
+        if s[:openParen].count('"') % 2 == 1:
+            break
+        rest = s[openParen:] # Everything after the first open paren
+        closeParen = rest.index(')') # Index of the first close paren in rest
+        s = s[:openParen] + rest[closeParen + 1:] # Concat everything outside the parens
     return s
 
 # If no article name was passed in
@@ -48,17 +50,19 @@ if(len(sys.argv) < 2):
     print("You must enter an article name to start with")
     exit()
 
-article = sys.argv[1]
-trail = [article]
-while(article.lower() != destArticle.lower()):
-    print("Working on " + article)
-    article = getNextArticleName(getArticleHtml(article))
-    if article in trail:
+article = sys.argv[1] # Get the article name
+trail = [article] # Initialize a list to track the trail
+while(article.lower() != destArticle.lower()): # While we haven't reached the destination...
+    print("Working on " + article) # TODO: Remove this line
+    article = getNextArticleName(getArticleHtml(article)) # Get the next article
+    if article in trail: # IF the next article is already in the trail...
+        # Print error and break
         print("Loop found! Call the internet police!")
         print("Found duplicate link to: " + article)
         break
-    trail.append(article)
+    trail.append(article) # Add this article to the trail
 
+# Print the trail
 i = 1
 for step in trail:
     print("{}. {}".format(i, step))
