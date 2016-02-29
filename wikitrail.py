@@ -63,13 +63,12 @@ article = '_'.join(sys.argv[1:]) # Get the article name
 trail = [article] # Initialize a list to track the trail
 while(article.lower() != destArticle.lower()): # While we haven't reached the destination...
     article = getNextArticleName(getArticleHtml(article)) # Get the next article
-    if article in trail: # IF the next article is already in the trail...
+    trail.append(article) # Add this article to the trail
+    if article in trail[:-1]: # IF the next article is already in the trail...
         # Print error and break
-        trail.append(article) # Add this article to the trail
         print("Found duplicate link to: " + article)
         printTrail(trail)
         exit()
-    trail.append(article) # Add this article to the trail
 
 # Print the trail
 print("It took {} step(s) to find {}".format(len(trail), destArticle))
