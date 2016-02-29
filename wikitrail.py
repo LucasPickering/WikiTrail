@@ -48,25 +48,29 @@ def stripParens(s):
 
     return result
 
+def printTrail(trail):
+    i = 1
+    for step in trail:
+        print("{}. {}".format(i, step))
+        i += 1
+
 # If no article name was passed in
 if(len(sys.argv) < 2):
     print("You must enter an article name to start with")
     exit()
 
-article = sys.argv[1] # Get the article name
+article = '_'.join(sys.argv[1:]) # Get the article name
 trail = [article] # Initialize a list to track the trail
 while(article.lower() != destArticle.lower()): # While we haven't reached the destination...
     article = getNextArticleName(getArticleHtml(article)) # Get the next article
     if article in trail: # IF the next article is already in the trail...
         # Print error and break
-        print("Loop found! Call the internet police!")
+        trail.append(article) # Add this article to the trail
         print("Found duplicate link to: " + article)
-        break
+        printTrail(trail)
+        exit()
     trail.append(article) # Add this article to the trail
 
 # Print the trail
 print("It took {} step(s) to find {}".format(len(trail), destArticle))
-i = 1
-for step in trail:
-    print("{}. {}".format(i, step))
-    i += 1
+printTrail(trail)
