@@ -17,7 +17,7 @@ wikiUrl = "http://en.wikipedia.org/wiki/"
 pRegex = r'<p[^>]*>(.*?)</p>'
 spanRegex = r'<span[^>]*>(.*?)</span>'
 italicsRegex = r'<i>(.*?)</i>'
-tableRegex = r'<table[^>]*>(.*?)</table>'
+tableRegex = r'<table(.*?)</table>'
 linkRegex = r'<a href="/wiki/(?!Help:)(.*?)"'
 
 # Downloads and returns the html text for the wikipedia page by the given name
@@ -29,10 +29,10 @@ def getArticleHtml(name):
 
 # Returns the name of the first article linked in the given html text, in all lower case
 def getNextArticleName(page):
-    page = re.sub(tableRegex, '', page) # Strip out all tables
+    page = re.sub(spanRegex, '', page, flags=re.DOTALL) # Strip out everything in a span tag
+    page = re.sub(tableRegex, '', page, flags=re.DOTALL) # Strip out all tables
     page = ''.join(re.findall(pRegex, page, re.DOTALL)) # Get everything in <p> tags
-    page = re.sub(spanRegex, '', page) # Strip out everything in a span tag
-    page = re.sub(italicsRegex, '', page) # Strip out everything in italics
+    page = re.sub(italicsRegex, '', page, flags=re.DOTALL) # Strip out everything in italics
     page = stripParens(page) # Strip out everything in parentheses
     page = re.findall(linkRegex, page, re.DOTALL)[0] # Get the first wiki link
     return page
@@ -66,8 +66,8 @@ trail = [article] # Initialize a list to track the trail
 while(article.lower() != destArticle.lower()): # While we haven't reached the destination...
     article = getNextArticleName(getArticleHtml(article)) # Get the next article
     trail.append(article) # Add this article to the trail
-    if article in trail[:-1]: # IF the next article is already in the trail...
-        # Print error and break
+    if article in trail[:-1]: # If the most recent article is already in the trail...
+        # Print error and trail, then break
         print("Found duplicate link to: " + article)
         printTrail(trail)
         exit()
