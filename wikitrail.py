@@ -17,7 +17,7 @@ wikiUrl = "http://en.wikipedia.org/wiki/"
 pRegex = r'<p[^>]*>(.*?)</p>'
 spanRegex = r'<span[^>]*>(.*?)</span>'
 italicsRegex = r'<i>(.*?)</i>'
-tableRegex = r'<table(.*?)</table>'
+tableRegex = r'<table[^>]*>(.*?)</table>'
 linkRegex = r'<a href="/wiki/(?!Help:)(.*?)"'
 
 # Downloads and returns the html text for the wikipedia page by the given name
