@@ -37,13 +37,14 @@ def getNextArticleName(page):
     page = re.findall(linkRegex, page, re.DOTALL)[0] # Get the first wiki link
     return page
 
+# Strip out everything inside parentheses
 def stripParens(s):
     inQuotes = False
     inParens = False
     result = ""
 
     for c in s: # For each character in the string...
-        inQuotes = xor(inQuotes, c == '"') # Track whether or not we're in quotes
+        inQuotes = xor(inQuotes, c == '"') # Toggle whether or not we're in quotes
         inParens = (inParens or c == '(') and c != ')' # Track whether or not we're in parens
         if inQuotes or not inParens: # If we're in quotes or not in parens...
             result += c # Add this character to the result
