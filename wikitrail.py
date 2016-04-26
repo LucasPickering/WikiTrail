@@ -10,15 +10,17 @@ from urllib.error import HTTPError
 from operator import xor
 import sys
 import re
+from datetime import datetime
+import time
 
 # Constants
 destArticle = "Philosophy"
 wikiUrl = "http://en.wikipedia.org/wiki/"
-pRegex = re.compile('<p[^>]*>(.*?)</p>', re.DOTALL)
-spanRegex = re.compile('<span[^>]*>(.*?)</span>', re.DOTALL)
-italicsRegex = re.compile('<i>(.*?)</i>', re.DOTALL)
-tableRegex = re.compile('<table[^>]*>(.*?)</table>', re.DOTALL)
-linkRegex = re.compile('<a href="/wiki/(?!Help:)(.*?)"', re.DOTALL)
+pRegex = re.compile(r'<p[^>]*>(.*?)</p>', re.DOTALL)
+spanRegex = re.compile(r'<span[^>]*>(.*?)</span>', re.DOTALL)
+italicsRegex = re.compile(r'<i>(.*?)</i>', re.DOTALL)
+tableRegex = re.compile(r'<table[^>]*>(.*?)</table>', re.DOTALL)
+linkRegex = re.compile(r'<a href="/wiki/(?!Help:)(.*?)"', re.DOTALL)
 
 # Downloads and returns the html text for the wikipedia page by the given name
 def getArticleHtml(name):
@@ -65,8 +67,10 @@ if(len(sys.argv) < 2):
 article = '_'.join(sys.argv[1:]) # Get the article name
 trail = [article] # Initialize a list to track the trail
 while(article.lower() != destArticle.lower()): # While we haven't reached the destination...
-    article = getNextArticleName(getArticleHtml(article)) # Get the next article
+    articleText = getArticleHtml(article) # Get the text of the article body
+    article = getNextArticleName(articleText) # Get the next article out of the article text
     trail.append(article) # Add this article to the trail
+
     if article in trail[:-1]: # If the most recent article is already in the trail...
         # Print error and trail, then break
         print("Found duplicate link to: " + article)
