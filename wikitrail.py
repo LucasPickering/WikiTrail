@@ -61,7 +61,7 @@ def printTrail(trail):
 
 # If no article name was passed in
 if(len(sys.argv) < 2):
-    print("You must enter an article name to start with")
+    print("Usage: {} <starting_article>".format(sys.argv[0]))
     exit()
 
 article = '_'.join(sys.argv[1:]) # Get the article name
