@@ -3,11 +3,8 @@
 import os
 import sys
 
-testArticles = ['Rose', 'Pokemon', 'America']
+testArticles = ['Rose', 'Pokemon', 'America', 'Kitchen']
 
-print("Running tests...")
-for article in testArticles:
-	print("\nTesting " + article)
-	sys.stdout.flush()
-	os.system('python wikitrail.py ' + article)
-print("\nFinished running tests")
+print("Running tests. . .")
+os.system('python wikitrail.py ' + ' '.join(testArticles))
+print("Finished running tests")
