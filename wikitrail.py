@@ -8,9 +8,11 @@
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from operator import xor
+import os
 import sys
 import re
-import time
+import json
+import traceback
 
 # Constants
 DEST_ARTICLE = "Philosophy"
@@ -20,6 +22,7 @@ TABLE_RGX = re.compile(r'<table[^>]*>.*?</table>', re.DOTALL)
 P_RGX = re.compile(r'<p[^>]*>.*?</p>', re.DOTALL)
 ITALICS_RGX = re.compile(r'<i>.*?</i>', re.DOTALL)
 LINK_RGX = re.compile(r'<a href="/wiki/(?!Help:)(.*?)"', re.DOTALL)
+JSON_FILE = 'trails.json'
 
 # Downloads and returns the html text for the wikipedia page by the given name
 def getArticleHtml(name):
@@ -70,14 +73,35 @@ def traceArticle(article):
             break
     return trail
 
+def printerr(msg):
+    print(msg, file=sys.stderr)
+
 if __name__ == '__main__':
     # If no article name was passed in
     if len(sys.argv) < 2:
-        print("Usage: {} <Starting article(s)>".format(sys.argv[0]))
-        sys.exit()
+        printerr("Usage: {} <Starting article(s)>".format(sys.argv[0]))
+        sys.exit(1)
+
+    # Load previous results from JSON into a dict, or if they don't exist, make an empty dict
+    if os.path.isfile(JSON_FILE):
+        with open(JSON_FILE) as f:
+            all_trails = json.load(f)
+    else:
+        all_trails = {}
 
     for article in sys.argv[1:]:
         print("Tracing {}. . .".format(article))
-        sys.stdout.flush()
-        trail = traceArticle(article)
-        printTrail(trail)
+        sys.stdout.flush() # Flush to make sure it gets printed before it starts trailblazing
+        try:
+            trail = traceArticle(article) # Get the trail
+            printTrail(trail) # Print the trail
+            all_trails[article.lower()] = trail # Save the trail to the dict
+        except Exception as e:
+            printerr("Error from root article {}:".format(article))
+            sys.stderr.flush()
+            traceback.print_exc(file=sys.stderr)
+
+    # Save all the data to the JSON file
+    with open(JSON_FILE, 'w') as f:
+        json.dump(all_trails, f, indent=4, sort_keys=True)
+
