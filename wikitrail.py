@@ -56,8 +56,8 @@ def stripParens(s):
     return result
 
 def printTrail(trail):
-    for i, step in enumerate(trail):
-        print("{}. {}".format(i + 1, step))
+    for i, step in enumerate(trail, 1):
+        print("{}. {}".format(i, step))
     print('')
 
 def traceArticle(article):
