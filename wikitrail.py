@@ -62,7 +62,7 @@ def printTrail(trail):
 
 def traceArticle(article):
     trail = [article] # Initialize a list to track the trail
-    while article.lower() != DEST_ARTICLE.lower(): # While we haven't reached the destination...
+    while article != DEST_ARTICLE: # While we haven't reached the destination...
         articleText = getArticleHtml(article) # Get the text of the article body
         article = getNextArticleName(articleText) # Get the next article out of the article text
         trail.append(article) # Add this article to the trail
@@ -95,7 +95,7 @@ if __name__ == '__main__':
         try:
             trail = traceArticle(article) # Get the trail
             printTrail(trail) # Print the trail
-            all_trails[article.lower()] = trail # Save the trail to the dict
+            all_trails[article] = trail # Save the trail to the dict
         except Exception as e:
             printerr("Error from root article {}:".format(article))
             sys.stderr.flush()
