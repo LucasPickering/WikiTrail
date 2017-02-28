@@ -25,12 +25,14 @@ ITALICS_RGX = re.compile(r'<i>.*?</i>', re.DOTALL)
 LINK_RGX = re.compile(r'<a href="/wiki/(?!Help:)(.*?)"', re.DOTALL)
 JSON_FILE = 'trails.json'
 
+
 # Downloads and returns the html text for the wikipedia page by the given name
 def getArticleHtml(name):
     try:
         return urlopen(wikiUrl + name).read().decode('cp1252', 'ignore')
     except HTTPError as err:
         print("Error loading page {} - code {}", name, err.code)
+
 
 # Returns the name of the first article linked in the given html text, in all lower case
 def getNextArticleName(text):
@@ -41,6 +43,7 @@ def getNextArticleName(text):
     text = stripParens(text) # Strip out everything in parentheses, except parens inside quotes
     text = LINK_RGX.search(text).group(1) # Get the first wiki link
     return text
+
 
 # Strip out everything inside parentheses, but not things in parentheses inside <a.../a>
 def stripParens(s):
@@ -56,10 +59,12 @@ def stripParens(s):
 
     return result
 
+
 def printTrail(trail):
     for i, step in enumerate(trail, 1):
         print("{}. {}".format(i, step))
     print('')
+
 
 def traceArticle(article, dest):
     trail = [article] # Initialize a list to track the trail
@@ -74,8 +79,10 @@ def traceArticle(article, dest):
             break
     return trail
 
+
 def printerr(msg):
     print(msg, file=sys.stderr)
+
 
 def main()
     parser = argparse.ArgumentParser(desc="Get the trail of a Wikipedia article")
