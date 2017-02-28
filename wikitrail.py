@@ -5,18 +5,19 @@
 # article that's not in italics or parentheses. The theory is that this will always lead to
 # Philosophy. Inspired by the alt-text of http://xkcd.com/903.
 
+import argparse
+import json
+import os
+import re
+import sys
+import traceback
 from urllib.request import urlopen
 from urllib.error import HTTPError
 from operator import xor
-import os
-import sys
-import re
-import json
-import traceback
 
 # Constants
-DEST_ARTICLE = "Philosophy"
-wikiUrl = "http://en.wikipedia.org/wiki/"
+DEFAULT_DEST = 'Philosophy'
+wikiUrl = 'http://en.wikipedia.org/wiki/'
 SPAN_RGX = re.compile(r'<span[^>]*>.*?</span>', re.DOTALL)
 TABLE_RGX = re.compile(r'<table[^>]*>.*?</table>', re.DOTALL)
 P_RGX = re.compile(r'<p[^>]*>.*?</p>', re.DOTALL)
@@ -60,9 +61,9 @@ def printTrail(trail):
         print("{}. {}".format(i, step))
     print('')
 
-def traceArticle(article):
+def traceArticle(article, dest):
     trail = [article] # Initialize a list to track the trail
-    while article != DEST_ARTICLE: # While we haven't reached the destination...
+    while article != dest: # While we haven't reached the destination...
         articleText = getArticleHtml(article) # Get the text of the article body
         article = getNextArticleName(articleText) # Get the next article out of the article text
         trail.append(article) # Add this article to the trail
@@ -76,11 +77,11 @@ def traceArticle(article):
 def printerr(msg):
     print(msg, file=sys.stderr)
 
-if __name__ == '__main__':
-    # If no article name was passed in
-    if len(sys.argv) < 2:
-        printerr("Usage: {} <Starting article(s)>".format(sys.argv[0]))
-        sys.exit(1)
+def main()
+    parser = argparse.ArgumentParser(desc="Get the trail of a Wikipedia article")
+    parser.add_argument('start', nargs='+', help="Article(s) to start from (1 trail per entry)")
+    parser.add_argument('--dest', '-d', default=DEFAULT_DEST, help="Destination article")
+    args = parser.parse_args()
 
     # Load previous results from JSON into a dict, or if they don't exist, make an empty dict
     if os.path.isfile(JSON_FILE):
@@ -89,11 +90,11 @@ if __name__ == '__main__':
     else:
         all_trails = {}
 
-    for article in sys.argv[1:]:
+    for article in args.start:
         print("Tracing {}. . .".format(article))
         sys.stdout.flush() # Flush to make sure it gets printed before it starts trailblazing
         try:
-            trail = traceArticle(article) # Get the trail
+            trail = traceArticle(article, args.dest) # Get the trail
             printTrail(trail) # Print the trail
             all_trails[article] = trail # Save the trail to the dict
         except Exception as e:
@@ -105,3 +106,5 @@ if __name__ == '__main__':
     with open(JSON_FILE, 'w') as f:
         json.dump(all_trails, f, indent=4, sort_keys=True)
 
+if __name__ == '__main__':
+    main()
