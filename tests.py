@@ -4,7 +4,7 @@ import os
 import sys
 import wikitrail
 
-TEST_ARTICLES = ['Rose', 'Pokemon', 'America', 'Kitchen']
+TEST_ARTICLES = ['Rose', 'Pokemon', 'America', 'Kitchen', 'Barack_Obama']
 
 
 def main():

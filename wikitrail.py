@@ -31,7 +31,7 @@ def getArticleHtml(name):
     try:
         return urlopen(wikiUrl + name).read().decode('cp1252', 'ignore')
     except HTTPError as err:
-        print("Error loading page {} - code {}", name, err.code)
+        print("Error loading page {} - code {}".format(name, err.code), file=sys.stderr)
 
 
 # Returns the name of the first article linked in the given html text, in all lower case
@@ -70,6 +70,11 @@ def traceArticle(article, dest):
     trail = [article]  # Initialize a list to track the trail
     while article != dest:  # While we haven't reached the destination...
         articleText = getArticleHtml(article)  # Get the text of the article body
+
+        # If the text is None, it failed to download, so stop the trail here
+        if not articleText:
+            break
+
         article = getNextArticleName(articleText)  # Get the next article out of the article text
         trail.append(article)  # Add this article to the trail
 
@@ -84,7 +89,7 @@ def printerr(msg):
     print(msg, file=sys.stderr)
 
 
-def main(args=sys.argv):
+def main(args=None):
     parser = argparse.ArgumentParser(description="Get the trail of a Wikipedia article")
     parser.add_argument('start', nargs='+', help="Article(s) to start from (1 trail per entry)")
     parser.add_argument('--dest', '-d', default=DEFAULT_DEST, help="Destination article")
