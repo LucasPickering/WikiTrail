@@ -84,11 +84,11 @@ def printerr(msg):
     print(msg, file=sys.stderr)
 
 
-def main():
-    parser = argparse.ArgumentParser(desc="Get the trail of a Wikipedia article")
+def main(args=sys.argv):
+    parser = argparse.ArgumentParser(description="Get the trail of a Wikipedia article")
     parser.add_argument('start', nargs='+', help="Article(s) to start from (1 trail per entry)")
     parser.add_argument('--dest', '-d', default=DEFAULT_DEST, help="Destination article")
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     # Load previous results from JSON into a dict, or if they don't exist, make an empty dict
     if os.path.isfile(JSON_FILE):

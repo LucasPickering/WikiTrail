@@ -2,9 +2,15 @@
 
 import os
 import sys
+import wikitrail
 
-testArticles = ['Rose', 'Pokemon', 'America', 'Kitchen']
+TEST_ARTICLES = ['Rose', 'Pokemon', 'America', 'Kitchen']
 
-print("Running tests. . .")
-os.system('python wikitrail.py ' + ' '.join(testArticles))
-print("Finished running tests")
+
+def main():
+    print("Running tests. . .")
+    wikitrail.main(TEST_ARTICLES)
+    print("Finished running tests")
+
+if __name__ == '__main__':
+    main()
