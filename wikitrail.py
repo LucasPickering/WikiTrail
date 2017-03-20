@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env PYTHON3
 
 # Follows the wiki trail of a certain page to Philosophy. A wiki trail is the series of pages you
 # get by starting at any page and continually following the first link in the main body of the
@@ -36,12 +36,12 @@ def getArticleHtml(name):
 
 # Returns the name of the first article linked in the given html text, in all lower case
 def getNextArticleName(text):
-    text = SPAN_RGX.sub('', text) # Strip out everything in a span tag
-    text = TABLE_RGX.sub('', text) # Strip out all tables
-    text = ''.join(P_RGX.findall(text)) # Get everything in <p> tags
-    text = ITALICS_RGX.sub('', text) # Strip out everything in italics
-    text = stripParens(text) # Strip out everything in parentheses, except parens inside quotes
-    text = LINK_RGX.search(text).group(1) # Get the first wiki link
+    text = SPAN_RGX.sub('', text)  # Strip out everything in a span tag
+    text = TABLE_RGX.sub('', text)  # Strip out all tables
+    text = ''.join(P_RGX.findall(text))  # Get everything in <p> tags
+    text = ITALICS_RGX.sub('', text)  # Strip out everything in italics
+    text = stripParens(text)  # Strip out everything in parentheses, except parens inside quotes
+    text = LINK_RGX.search(text).group(1)  # Get the first wiki link
     return text
 
 
@@ -51,11 +51,11 @@ def stripParens(s):
     inParens = False
     result = ''
 
-    for c in s: # For each character in the string...
-        inQuotes = xor(inQuotes, c == '"') # Toggle whether or not we're in quotes
-        inParens = (inParens or c == '(') and c != ')' # Track whether or not we're in parens
-        if inQuotes or not inParens: # If we're in quotes or not in parens...
-            result += c # Add this character to the result
+    for c in s:  # For each character in the string...
+        inQuotes = xor(inQuotes, c == '"')  # Toggle whether or not we're in quotes
+        inParens = (inParens or c == '(') and c != ')'  # Track whether or not we're in parens
+        if inQuotes or not inParens:  # If we're in quotes or not in parens...
+            result += c  # Add this character to the result
 
     return result
 
@@ -67,13 +67,13 @@ def printTrail(trail):
 
 
 def traceArticle(article, dest):
-    trail = [article] # Initialize a list to track the trail
-    while article != dest: # While we haven't reached the destination...
-        articleText = getArticleHtml(article) # Get the text of the article body
-        article = getNextArticleName(articleText) # Get the next article out of the article text
-        trail.append(article) # Add this article to the trail
+    trail = [article]  # Initialize a list to track the trail
+    while article != dest:  # While we haven't reached the destination...
+        articleText = getArticleHtml(article)  # Get the text of the article body
+        article = getNextArticleName(articleText)  # Get the next article out of the article text
+        trail.append(article)  # Add this article to the trail
 
-        if article in trail[:-1]: # If the most recent article is already in the trail...
+        if article in trail[:-1]:  # If the most recent article is already in the trail...
             # Print error and break out (the trail will still get returned and pretty)
             print("Found duplicate link to: " + article)
             break
@@ -84,7 +84,7 @@ def printerr(msg):
     print(msg, file=sys.stderr)
 
 
-def main()
+def main():
     parser = argparse.ArgumentParser(desc="Get the trail of a Wikipedia article")
     parser.add_argument('start', nargs='+', help="Article(s) to start from (1 trail per entry)")
     parser.add_argument('--dest', '-d', default=DEFAULT_DEST, help="Destination article")
@@ -99,11 +99,11 @@ def main()
 
     for article in args.start:
         print("Tracing {}. . .".format(article))
-        sys.stdout.flush() # Flush to make sure it gets printed before it starts trailblazing
+        sys.stdout.flush()  # Flush to make sure it gets printed before it starts trailblazing
         try:
-            trail = traceArticle(article, args.dest) # Get the trail
-            printTrail(trail) # Print the trail
-            all_trails[article] = trail # Save the trail to the dict
+            trail = traceArticle(article, args.dest)  # Get the trail
+            printTrail(trail)  # Print the trail
+            all_trails[article] = trail  # Save the trail to the dict
         except Exception as e:
             printerr("Error from root article {}:".format(article))
             sys.stderr.flush()
