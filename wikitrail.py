@@ -1,4 +1,4 @@
-#!/usr/bin/env PYTHON3
+#!/usr/bin/env python3
 
 # Follows the wiki trail of a certain page to Philosophy. A wiki trail is the series of pages you
 # get by starting at any page and continually following the first link in the main body of the
@@ -7,10 +7,9 @@
 
 import argparse
 import json
-import logging
-import os
 import re
 import requests
+import sys
 import traceback
 
 # Constants
@@ -23,9 +22,6 @@ ITALICS_RGX = re.compile(r'<i>.*?</i>', re.DOTALL)
 LINK_RGX = re.compile(r'<a href="/wiki/(?!Help:)(.*?)"', re.DOTALL)
 JSON_FILE = 'trails.json'
 
-logging.basicConfig(format='{asctime} - {levelname} - {message}', datefmt='%Y-%m-%d %H:%M:%S',
-                    style='{')
-
 
 class Trail(list):
 
@@ -33,16 +29,22 @@ class Trail(list):
         self.append(starting_article)
 
     def __str__(self):
-        return '\n'.join(['{}. {}'.format(i, article) for i, article in enumerate(self, 1)])
+        max_len = max(len(a) for a in self)
+        lines = ['{}. {} {}'.format(i, article.ljust(max_len + 3), get_url(article)) for i, article in enumerate(self, 1)]
+        return '\n'.join(lines)
+
+
+def get_url(article):
+    return WIKIPEDIA_URL.format(article)
 
 
 # Downloads and returns the html text for the wikipedia page by the given name
 def download_article(name):
-    url = WIKIPEDIA_URL.format(name)
+    url = get_url(name)
     response = requests.get(url)
     if response.ok:
         return response.text
-    logging.error("Code {} loading '{}'".format(response.text, url))
+    print("Code {} loading '{}'".format(response.text, url), file=sys.stderr)
 
 
 def extract_next_article(text):
@@ -82,7 +84,7 @@ def trace_article(article, dest):
 
         if article in trail:  # If the most recent article is already in the trail...
             # Print error and break out (the trail will still get returned and pretty printed)
-            logging.warning("Found duplicate link to: " + article)
+            print("Found duplicate link to: " + article)
             break
 
         trail.append(article)  # Add this article to the trail
@@ -91,25 +93,28 @@ def trace_article(article, dest):
 
 
 def main(*start_articles, dest_article=DEFAULT_DEST):
-    # Load previous results from JSON into a dict, or if they don't exist, make an empty dict
-    if os.path.isfile(JSON_FILE):
-        with open(JSON_FILE) as f:
-            all_trails = json.load(f)
-    else:
-        all_trails = {}
+    all_trails = {}
 
     for article in start_articles:
-        logging.info("Tracing {}. . .".format(article))
+        print("Tracing {}...".format(article))
         try:
             trail = trace_article(article, dest_article)  # Get the trail
-            logging.info(trail)  # Print the trail
+            print(trail)  # Print the trail
             all_trails[article] = trail  # Save the trail to the dict
         except Exception:
-            logging.error("Error from root article {}:\n{}".format(article, traceback.format_exc()))
+            print("Error from root article {}:\n{}".format(article, traceback.format_exc()),
+                  file=sys.stderr)
+        print('')
 
     # Save all the data to the JSON file
+    try:
+        with open(JSON_FILE) as f:
+            loaded = json.load(f)
+    except FileNotFoundError:
+        loaded = {}
+    loaded.update(all_trails)
     with open(JSON_FILE, 'w') as f:
-        json.dump(all_trails, f, indent=4, sort_keys=True)
+        json.dump(loaded, f, indent=4, sort_keys=True)
 
 
 if __name__ == '__main__':
@@ -117,4 +122,4 @@ if __name__ == '__main__':
     parser.add_argument('start', nargs='+', help="Article(s) to start from (1 trail per entry)")
     parser.add_argument('--dest', '-d', default=DEFAULT_DEST, help="Destination article")
     args = parser.parse_args()
-    main(*args.start, args.dest)
+    main(*args.start, dest_article=args.dest)
